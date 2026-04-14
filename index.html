@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+
+<!-- SEO Meta Tags -->
+<title>AXIOM — AI-Powered Web Design That Converts</title>
+<meta name="description" content="We use AI to design and build websites that convert visitors into customers — in days, not months. Starting at $797." />
+<meta property="og:title" content="AXIOM — AI-Powered Web Design That Converts" />
+<meta property="og:description" content="We use AI to design and build websites that convert visitors into customers — in days, not months. Starting at $797." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="AXIOM — AI-Powered Web Design That Converts" />
+<meta name="twitter:description" content="We use AI to design and build websites that convert visitors into customers — in days, not months. Starting at $797." />
+<!-- End SEO Meta Tags -->
+
+<script data-field-replace>
+(function(){
+  var params=new URLSearchParams(window.location.search);
+  var fields={};
+  var paramMap={
+    'first_name':'firstName','last_name':'lastName','full_name':'fullName',
+    'email':'email','phone':'phone','company':'company',
+    'city':'city','state':'state','country':'country'
+  };
+  var skipTags={'SCRIPT':1,'STYLE':1,'NOSCRIPT':1,'TEXTAREA':1,'CODE':1,'PRE':1};
+  var hasUrlFields=false;
+  for(var p in paramMap){
+    var v=params.get(p);
+    if(v){fields[paramMap[p]]=v;hasUrlFields=true;}
+  }
+  var contactId=params.get('contact_id');
+  function esc(s){
+    if(!s)return s;
+    var d=document.createElement('div');
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+  function doReplace(data){
+    var r={};
+    r['{{full_name}}']=esc(((data.firstName||'')+' '+(data.lastName||'')).trim()||((data.fullName||data.name)||''));
+    r['{{first_name}}']=esc(data.firstName||(data.name?data.name.split(' ')[0]:'')||'');
+    r['{{last_name}}']=esc(data.lastName||(data.name&&data.name.indexOf(' ')>-1?data.name.substring(data.name.indexOf(' ')+1):'')||'');
+    r['{{email}}']=esc(data.email||'');
+    r['{{phone}}']=esc(data.phone||'');
+    r['{{company}}']=esc(data.company||'');
+    r['{{city}}']=esc(data.city||'');
+    r['{{state}}']=esc(data.state||'');
+    r['{{country}}']=esc(data.country||'');
+    r['{{date}}']=new Date().toLocaleDateString();
+    r['{{time}}']=new Date().toLocaleTimeString();
+    r['{{location}}']=[data.city,data.state,data.country].filter(Boolean).join(', ');
+    r['{{tracking_id}}']=esc(data.trackingId||'');
+    r['{{lastClickedProduct}}']=esc(data.lastClickedProduct||'');
+    r['{{lastProductClickDate}}']=esc(data.lastProductClickDate||'');
+    r['{{lastClickedProductPrice}}']=esc(data.lastClickedProductPrice||'');
+    r['{{lastClickedProductURL}}']=esc(data.lastClickedProductURL||'');
+    r['{{productsClickedCount}}']=esc(data.productsClickedCount||'0');
+    r['{{ip_address}}']=esc(data.ipAddress||'');
+    r['{{ip}}']=esc(data.ipAddress||'');
+    if(data.customFields){
+      for(var k in data.customFields){
+        r['{{'+k+'}}']=esc(String(data.customFields[k]||''));
+      }
+    }
+    params.forEach(function(v,k){
+      if(!paramMap[k]&&k!=='contact_id'&&k!=='page_id'&&k.indexOf('utm_')!==0){
+        r['{{'+k+'}}']=esc(v);
+      }
+    });
+    var hasValues=false;
+    for(var key in r){if(r[key]){hasValues=true;break;}}
+    if(!hasValues)return;
+    var walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{
+      acceptNode:function(n){
+        var p=n.parentNode;
+        if(p&&skipTags[p.nodeName])return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var node;
+    while(node=walker.nextNode()){
+      var txt=node.nodeValue;
+      if(txt&&txt.indexOf('{{')>-1){
+        var changed=txt;
+        for(var ph in r){
+          if(r[ph]&&changed.indexOf(ph)>-1){
+            changed=changed.split(ph).join(r[ph]);
+          }
+        }
+        if(changed!==txt)node.nodeValue=changed;
+      }
+    }
+    var attrs=['value','placeholder','content','alt','title'];
+    attrs.forEach(function(attr){
+      var els=document.querySelectorAll('['+attr+'*="{{"]');
+      for(var i=0;i<els.length;i++){
+        var tag=els[i].tagName;
+        if(skipTags[tag])continue;
+        var val=els[i].getAttribute(attr);
+        if(val){
+          var nv=val;
+          for(var ph in r){
+            if(r[ph]&&nv.indexOf(ph)>-1){
+              nv=nv.split(ph).join(r[ph]);
+            }
+          }
+          if(nv!==val)els[i].setAttribute(attr,nv);
+        }
+      }
+    });
+  }
+  function run(){
+    if(contactId){
+      var xhr=new XMLHttpRequest();
+      xhr.open('GET','https://paymegpt.com/api/landing/context/'+encodeURIComponent(contactId)+'?page_id=3245');
+      xhr.onload=function(){
+        if(xhr.status===200){
+          try{
+            var resp=JSON.parse(xhr.responseText);
+            if(resp.success&&resp.contact){
+              var merged=resp.contact;
+              for(var k in fields){merged[k]=fields[k];}
+              doReplace(merged);
+              return;
+            }
+          }catch(e){}
+        }
+        if(hasUrlFields)doReplace(fields);
+      };
+      xhr.onerror=function(){if(hasUrlFields)doReplace(fields);};
+      xhr.send();
+    }else if(hasUrlFields){
+      doReplace(fields);
+    }
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',run);}
+  else{run();}
+})();
+</script>
+<script data-payment>
+(function(){
+  var slug='PUt27S7Br';
+  var apiBase='https://paymegpt.com';
+  function findEmail(){
+    var ids=['email','emailAddress','buyer-email','buyerEmail','user-email','userEmail','checkout-email','customer-email','contact-email'];
+    for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(el&&el.value&&el.value.includes('@'))return el.value.trim();}
+    var inputs=document.querySelectorAll('input[type="email"],input[name*="email"],input[placeholder*="email"],input[placeholder*="Email"]');
+    for(var j=0;j<inputs.length;j++){if(inputs[j].value&&inputs[j].value.includes('@'))return inputs[j].value.trim();}
+    return '';
+  }
+  function findName(){
+    var ids=['name','fullName','full-name','buyer-name','buyerName','customer-name','userName','user-name'];
+    for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(el&&el.value)return el.value.trim();}
+    var inputs=document.querySelectorAll('input[name*="name"]:not([name*="email"]):not([type="email"]),input[placeholder*="name"]:not([placeholder*="email"]):not([type="email"]),input[placeholder*="Name"]:not([type="email"])');
+    for(var j=0;j<inputs.length;j++){if(inputs[j].value)return inputs[j].value.trim();}
+    return '';
+  }
+  var __realProcessPayment=function(a,b,c,d,e){
+    var amountCents,email,productName,productDescription,customerName,quantity;
+    if(a&&typeof a==='object'){
+      amountCents=a.amountCents;email=a.email;productName=a.productName;
+      productDescription=a.productDescription||'';customerName=a.name||'';quantity=a.quantity||1;
+    }else{
+      amountCents=typeof a==='number'?a:0;productName=typeof b==='string'?b:'';
+      productDescription=typeof c==='string'?c:'';email='';customerName='';quantity=1;
+    }
+    if(!email)email=findEmail();
+    if(!customerName)customerName=findName();
+    if(!productName){alert('Product name is required.');return Promise.reject('no_product_name');}
+    if(!amountCents||amountCents<100){alert('Amount must be at least $1.00');return Promise.reject('invalid_amount');}
+    if(!email){alert('Please enter your email address.');return Promise.reject('no_email');}
+    var successBase=window.location.href.split('?')[0];
+    return fetch(apiBase+'/api/landing-pages/public/'+slug+'/payment/checkout',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:email,name:customerName,amountCents:amountCents,productName:productName,productDescription:productDescription,quantity:quantity,successUrl:successBase+'?payment=success&product='+encodeURIComponent(productName)+'&session_id={CHECKOUT_SESSION_ID}',cancelUrl:successBase+'?payment=cancelled'})
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d.checkoutUrl){window.location.href=d.checkoutUrl;}
+      else{alert(d.error||'Failed to process payment');throw new Error(d.error);}
+    });
+  };
+  Object.defineProperty(window,'__processPayment',{value:__realProcessPayment,writable:false,configurable:false});
+  document.addEventListener('DOMContentLoaded',function(){
+    var urlParams=new URLSearchParams(window.location.search);
+    if(urlParams.get('payment')==='success'){
+      var pName=urlParams.get('product')||'your item';
+      var overlay=document.createElement('div');overlay.id='payment-success-overlay';
+      overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:999999;font-family:system-ui,-apple-system,sans-serif;';
+      overlay.innerHTML='<div style="background:white;border-radius:16px;padding:40px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.15);"><div style="width:64px;height:64px;border-radius:50%;background:#dcfce7;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><h2 style="margin:0 0 12px;font-size:24px;font-weight:700;color:#111827;">Payment Successful!</h2><p style="margin:0 0 24px;color:#6b7280;font-size:16px;">Thank you for purchasing '+pName.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'.</p><button onclick="document.getElementById(\'payment-success-overlay\').remove();window.history.replaceState({},\'\',window.location.pathname);" style="padding:12px 32px;font-size:16px;font-weight:600;background:#16a34a;color:white;border:none;border-radius:8px;cursor:pointer;">Continue</button></div>';
+      document.body.appendChild(overlay);
+    }
+  });
+})();
+</script>  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">AXI<span>OM</span></a>
+  <div class="nav-links">
+    <a href="#how">How It Works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <a href="#pricing" class="nav-btn">Get Started →</a>
+</nav>
+
+<!-- HERO -->
+<section style="background:var(--white);">
+  <div class="hero">
+    <div>
+      <div class="hero-badge" style="animation:fadeIn .6s ease both;"><div class="hero-badge-dot"></div>Now Accepting New Clients</div>
+      <h1 style="animation:fadeUp .7s ease .1s both;">Your Website, Built by <span>AI.</span><br>Your Results, Better Than Ever.</h1>
+      <p class="hero-sub" style="animation:fadeUp .7s ease .2s both;">We combine AI precision with human strategy to design websites that <strong>convert visitors into paying customers</strong> — delivered in days, not months.</p>
+      <div class="hero-btns" style="animation:fadeUp .7s ease .3s both;">
+        <a href="#pricing" class="btn-blue">See Pricing &amp; Buy Now →</a>
+        <a href="#how" class="btn-outline">How It Works</a>
+      </div>
+      <div class="hero-trust" style="animation:fadeIn .8s ease .5s both;">
+        <div class="trust-avatars">
+          <div class="trust-av">MR</div>
+          <div class="trust-av">JL</div>
+          <div class="trust-av">DK</div>
+          <div class="trust-av">AS</div>
+          <div class="trust-av">+</div>
+        </div>
+        <span>Trusted by <strong style="color:var(--black);">250+ businesses</strong> — 4.9★ average rating</span>
+      </div>
+    </div>
+    <div class="reveal-r">
+      <div class="hero-img">
+        <img src="https://paymegpt.com/objects/generated-images/488/1776144932745-203eff1f43480a5d.jpeg" alt="AI Web Design by AXIOM">
+        <div class="hero-img-badge">
+          <div class="hib-icon">⚡</div>
+          <div><div class="hib-num">5 Days</div><div class="hib-lbl">Average delivery</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-strip">
+  <div class="ticker-inner">
+    <span class="t-item"><span class="t-dot"></span>AI-Powered Design</span>
+    <span class="t-item"><span class="t-dot"></span>24/7 AI Chatbot Included</span>
+    <span class="t-item"><span class="t-dot"></span>CRM Pipeline Setup</span>
+    <span class="t-item"><span class="t-dot"></span>Meta Ads Ready</span>
+    <span class="t-item"><span class="t-dot"></span>Mobile First</span>
+    <span class="t-item"><span class="t-dot"></span>Zero Templates</span>
+    <span class="t-item"><span class="t-dot"></span>Delivered in Days</span>
+    <span class="t-item"><span class="t-dot"></span>AI-Powered Design</span>
+    <span class="t-item"><span class="t-dot"></span>24/7 AI Chatbot Included</span>
+    <span class="t-item"><span class="t-dot"></span>CRM Pipeline Setup</span>
+    <span class="t-item"><span class="t-dot"></span>Meta Ads Ready</span>
+    <span class="t-item"><span class="t-dot"></span>Mobile First</span>
+    <span class="t-item"><span class="t-dot"></span>Zero Templates</span>
+    <span class="t-item"><span class="t-dot"></span>Delivered in Days</span>
+  </div>
+</div>
+
+<!-- NUMBERS -->
+<div class="nums">
+  <div class="nums-inner reveal">
+    <div class="num-cell"><div class="n-val">250<em>+</em></div><div class="n-lbl">Businesses transformed</div></div>
+    <div class="num-cell"><div class="n-val"><em>$</em>40M</div><div class="n-lbl">Revenue driven for clients</div></div>
+    <div class="num-cell"><div class="n-val">2.4<em>×</em></div><div class="n-lbl">Average conversion lift</div></div>
+    <div class="num-cell"><div class="n-val">4.9<em>★</em></div><div class="n-lbl">Average client rating</div></div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="how">
+  <div class="reveal">
+    <div class="section-label">The Process</div>
+    <h2>From Idea to Live Website<br>in <span>3 Simple Steps.</span></h2>
+    <p class="sec-sub">No lengthy discovery phases. No back-and-forth for months. We move fast because your business can't afford to wait.</p>
+  </div>
+  <div class="how-grid">
+    <div class="how-card reveal d1">
+      <div class="how-icon">🎯</div>
+      <div class="how-num">Step 01</div>
+      <h3>You Buy, We Brief</h3>
+      <p>Choose your package and complete a 10-minute intake form. Tell us your brand, goals, and what success looks like. That's all we need.</p>
+    </div>
+    <div class="how-card reveal d2">
+      <div class="how-icon">🤖</div>
+      <div class="how-num">Step 02</div>
+      <h3>AI Builds, Humans Refine</h3>
+      <p>Our AI engine generates your website design, copy, and automation flows. Our team then refines every pixel for your exact brand and market.</p>
+    </div>
+    <div class="how-card reveal d3">
+      <div class="how-icon">🚀</div>
+      <div class="how-num">Step 03</div>
+      <h3>Go Live &amp; Convert</h3>
+      <p>Your site goes live, your AI chatbot is active, and your CRM is ready to capture leads. You start converting on day one.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT'S INCLUDED -->
+<section class="features" id="features">
+  <div class="feat-grid">
+    <div class="reveal-l">
+      <img src="https://paymegpt.com/objects/generated-images/488/1776144942669-65f1ae8247cadd66.jpeg" alt="AI Web Design Process" style="width:100%;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.1);">
+    </div>
+    <div class="reveal-r">
+      <div class="section-label">What's Included</div>
+      <h2>Everything Your Business<br>Needs to <span>Win Online.</span></h2>
+      <p class="sec-sub" style="margin-bottom:32px;">Every AXIOM package comes with more than just a website — it comes with the full AI-powered system behind it.</p>
+      <div class="feat-list">
+        <div class="feat-item">
+          <div class="feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><strong>Custom AI-designed website</strong><span>No templates. Built specifically for your brand, industry, and target customer.</span></div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><strong>AI chatbot — live 24/7</strong><span>Answers questions, qualifies leads, and books appointments while you sleep.</span></div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><strong>Lead capture + CRM pipeline</strong><span>Every inquiry auto-captured, categorized, and followed up with via SMS and email.</span></div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><strong>Mobile-first, blazing fast</strong><span>Optimized for every device. Google PageSpeed 95+. SEO foundation included.</span></div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><strong>Meta Ads ready (Pro + Elite)</strong><span>Landing pages pre-built for your ad campaigns. Tracking pixels installed and verified.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS STRIP -->
+<div class="results-strip">
+  <div class="results-inner">
+    <div class="results-left reveal-l">
+      <div class="section-label" style="color:rgba(255,255,255,.6);">Real Results</div>
+      <h2>The Average AXIOM Client Sees <br>Results Within <span style="color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,.3);">30 Days.</span></h2>
+      <p>+312% traffic. 2.4× conversions. Revenue you can measure. This isn't marketing fluff — these are the numbers our clients report in their first quarter.</p>
+      <a href="#pricing" class="btn-white">Get My Results →</a>
+    </div>
+    <div class="results-img reveal-r">
+      <img src="https://paymegpt.com/objects/generated-images/488/1776144951938-d91ab4237b2462f5.jpeg" alt="Client Results Dashboard">
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="pricing-head reveal">
+    <div class="section-label">Simple Pricing</div>
+    <h2>Pick Your Package.<br><span>Buy Today. Go Live This Week.</span></h2>
+    <p style="color:var(--gray);font-size:16px;max-width:500px;margin:12px auto 0;line-height:1.75;">One-time investment. No monthly fees. No contracts. Everything built for your business, delivered fast.</p>
+  </div>
+  <div class="pricing-grid">
+
+    <!-- STARTER -->
+    <div class="pricing-card reveal d1">
+      <div class="pc-tier">Starter</div>
+      <div class="pc-name">AXIOM Starter</div>
+      <div class="pc-desc">Perfect for small businesses that need a professional AI-powered presence fast.</div>
+      <div class="pc-price">
+        <div class="pc-dollar">$</div>
+        <div class="pc-amount">797</div>
+      </div>
+      <div class="pc-delivery">Delivered in 5 business days</div>
+      <div class="pc-divider"></div>
+      <div class="pc-features">
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>1 custom AI-designed landing page</div>
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>AI chatbot (24/7 lead capture)</div>
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>CRM lead pipeline setup</div>
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Mobile-optimized + SEO base</div>
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>14-day post-launch support</div>
+      </div>
+      <a href="https://paymegpt.com/shop/starlight-gm" target="_blank" class="buy-btn buy-btn-outline">Buy Starter — $797</a>
+    </div>
+
+    <!-- PRO (FEATURED) -->
+    <div class="pricing-card featured reveal d2">
+      <div class="popular-badge">⚡ Most Popular</div>
+      <div class="pc-tier" style="color:var(--blue);">Pro</div>
+      <div class="pc-name">AXIOM Pro</div>
+      <div class="pc-desc">The full AI website system for businesses ready to scale leads and revenue.</div>
+      <div class="pc-price">
+        <div class="pc-dollar" style="color:var(--blue);">$</div>
+        <div class="pc-amount blue">1,997</div>
+      </div>
+      <div class="pc-delivery">Delivered in 10 business days</div>
+      <div class="pc-divider"></div>
+      <div class="pc-features">
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Full multi-page website (up to 7 pages)</div>
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>AI chatbot + voice agent</div>
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Full CRM pipeline + automation</div>
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Email + SMS follow-up sequences</div>
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Google Analytics + Meta Pixel</div>
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>30-day post-launch support</div>
+      </div>
+      <a href="https://paymegpt.com/shop/starlight-gm" target="_blank" class="buy-btn buy-btn-filled">Buy Pro — $1,997 →</a>
+    </div>
+
+    <!-- ELITE -->
+    <div class="pricing-card reveal d3">
+      <div class="pc-tier">Elite</div>
+      <div class="pc-name">AXIOM Elite</div>
+      <div class="pc-desc">The complete AI business engine — brand, website, automation, and dominance.</div>
+      <div class="pc-price">
+        <div class="pc-dollar">$</div>
+        <div class="pc-amount">4,997</div>
+      </div>
+      <div class="pc-delivery">Delivered in 14 business days</div>
+      <div class="pc-divider"></div>
+      <div class="pc-features">
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Complete brand identity system</div>
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Unlimited-page custom website</div>
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>AI chatbot + voice receptionist</div>
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>2 Meta Ads landing pages</div>
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Full automation stack</div>
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Monthly performance reports</div>
+        <div class="pc-feat"><div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>60-day priority support</div>
+      </div>
+      <a href="https://paymegpt.com/shop/starlight-gm" target="_blank" class="buy-btn buy-btn-outline">Buy Elite — $4,997</a>
+    </div>
+  </div>
+  <p class="pricing-note reveal">All packages are <strong>one-time payments</strong>. No subscriptions. No hidden fees. <strong>30-day money-back guarantee</strong> if we don't deliver.</p>
+</section>
+
+<!-- AI AUTOMATION FEATURE HIGHLIGHT -->
+<section style="background:var(--gray-light);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:80px 48px;">
+  <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;">
+    <div class="reveal-l">
+      <div class="section-label">The AI System</div>
+      <h2>Your Website Works.<br>Your AI <span>Closes.</span></h2>
+      <p class="sec-sub" style="margin-bottom:28px;">Every AXIOM site includes a custom AI agent that answers leads, qualifies them, and books appointments — automatically. While you focus on the work, your AI handles the hustle.</p>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:center;gap:12px;font-size:14px;color:var(--gray);">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;"></div>
+          Responds to leads in under 60 seconds — 24/7/365
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:14px;color:var(--gray);">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;"></div>
+          Answers FAQs, collects info, and qualifies prospects
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:14px;color:var(--gray);">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;"></div>
+          Sends automated follow-up via SMS and email
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:14px;color:var(--gray);">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;"></div>
+          Every lead tracked in your CRM pipeline automatically
+        </div>
+      </div>
+    </div>
+    <div class="reveal-r">
+      <img src="https://paymegpt.com/objects/generated-images/488/1776144961127-a38c6d995ef55c47.jpeg" alt="AI Automation System" style="width:100%;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.1);">
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="tests">
+  <div class="tests-inner">
+    <div style="text-align:center;" class="reveal">
+      <div class="section-label">Client Results</div>
+      <h2>Real Businesses. <span>Real Revenue.</span></h2>
+      <p style="color:var(--gray);font-size:16px;max-width:480px;margin:12px auto 0;line-height:1.75;">Don't take our word for it. Here's what AXIOM clients say after going live.</p>
+    </div>
+    <div class="tests-grid">
+      <div class="test-card reveal d1">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-text">"We went from a dead website to a full AI system in 8 days. The chatbot alone has booked 14 new appointments in the first month without us lifting a finger. This is insane ROI."</p>
+        <div class="test-meta">
+          <div class="test-av">MR</div>
+          <div>
+            <div class="test-name">Marcus R.</div>
+            <div class="test-title">Owner, Apex Plumbing</div>
+            <div class="test-result">+$28K revenue month 1</div>
+          </div>
+        </div>
+      </div>
+      <div class="test-card reveal d2">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-text">"I was skeptical about AI design but the site they delivered looked better than anything I could have gotten from an agency at 10× the price. And the chatbot actually converts. Wild."</p>
+        <div class="test-meta">
+          <div class="test-av">JL</div>
+          <div>
+            <div class="test-name">Jessica L.</div>
+            <div class="test-title">Founder, Ivory Skin Co.</div>
+            <div class="test-result">3.1× conversion lift</div>
+          </div>
+        </div>
+      </div>
+      <div class="test-card reveal d3">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-text">"Bought the Elite package on a Tuesday. Had a full brand identity, website, and AI receptionist live by the following Friday. My competitor is still using the same site from 2017. I win."</p>
+        <div class="test-meta">
+          <div class="test-av">DK</div>
+          <div>
+            <div class="test-name">Daniel K.</div>
+            <div class="test-title">Owner, Voltage Electric</div>
+            <div class="test-result">Live in 5 days</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div style="text-align:center;" class="reveal">
+    <div class="section-label">FAQ</div>
+    <h2>Questions Answered.<br><span>Objections Removed.</span></h2>
+  </div>
+  <div class="faq-list reveal">
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)"><h4>How is this different from hiring a regular web designer?</h4><div class="faq-icon">+</div></div>
+      <div class="faq-a">A traditional designer takes 4–12 weeks and $3,000–$15,000 for a site that doesn't include any automation. AXIOM uses AI to compress that timeline to days and includes the AI chatbot, CRM, and automation sequences that a regular designer won't build. You get more, faster, for less.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)"><h4>What happens after I buy?</h4><div class="faq-icon">+</div></div>
+      <div class="faq-a">Within 24 hours of purchase, you'll receive a 10-minute intake form. Once submitted, our AI engine starts building within 48 hours. You'll receive a review link for feedback, and after approval, we go live. The whole process is fast and guided — no technical knowledge needed from you.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)"><h4>Do I need to provide content or photos?</h4><div class="faq-icon">+</div></div>
+      <div class="faq-a">No. Our AI generates compelling copy based on your intake form. We source licensed imagery. If you have brand photos or specific content you want included, even better — but it's not required to get started.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)"><h4>What's the money-back guarantee?</h4><div class="faq-icon">+</div></div>
+      <div class="faq-a">If we don't deliver your project within the stated timeframe or you're not satisfied with the quality after your revision round, we'll refund 100% of your purchase. No hassle, no questions. We back our work completely.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)"><h4>Will I own the website?</h4><div class="faq-icon">+</div></div>
+      <div class="faq-a">Yes. You own 100% of everything we build. Code, content, domain — all yours. We hand off full admin access at launch. No ongoing fees, no lock-in. What we build is permanently yours.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)"><h4>Can I upgrade my package later?</h4><div class="faq-icon">+</div></div>
+      <div class="faq-a">Absolutely. Many clients start with Starter and upgrade to Pro or Elite after seeing results. We apply what you already paid toward the upgrade. Just reach out and we'll handle the transition seamlessly.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="final-cta-inner reveal">
+    <div class="section-label" style="color:rgba(255,255,255,.4);margin-bottom:14px;">Limited Availability</div>
+    <h2>Stop Losing Leads to a<br>Website That <span>Doesn't Convert.</span></h2>
+    <p>Every day your current site underperforms is revenue walking out the door. Pick your package, buy today, and we'll have you live and converting within the week.</p>
+    <div class="cta-btns">
+      <a href="https://paymegpt.com/shop/starlight-gm" target="_blank" class="btn-blue-lg">Browse Packages &amp; Buy Now →</a>
+      <a href="https://paymegpt.com/agents/18018843" target="_blank" class="btn-ghost-dark">💬 Chat With Our Team</a>
+    </div>
+    <div class="final-note">
+      <span>✓ 30-day money-back guarantee</span>
+      <span>✓ No contracts</span>
+      <span>✓ Delivered in days</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="footer-logo">AXI<span>OM</span></a>
+        <p>AI-powered web design for businesses that are serious about growth. A Silent Crane product. Serving clients globally.</p>
+      </div>
+      <div class="footer-col"><h4>Products</h4><ul><li><a href="https://paymegpt.com/shop/starlight-gm" target="_blank">AXIOM Starter — $797</a></li><li><a href="https://paymegpt.com/shop/starlight-gm" target="_blank">AXIOM Pro — $1,997</a></li><li><a href="https://paymegpt.com/shop/starlight-gm" target="_blank">AXIOM Elite — $4,997</a></li></ul></div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a href="#how">How It Works</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#faq">FAQ</a></li><li><a href="https://paymegpt.com/p/Qga9p9" target="_blank">SŌLID Design Studio</a></li></ul></div>
+      <div class="footer-col"><h4>Contact</h4><ul><li><a href="https://paymegpt.com/agents/18018843" target="_blank">Live Chat</a></li><li><a href="https://paymegpt.com/shop/starlight-gm" target="_blank">Buy Now</a></li><li><a href="mailto:hello@axiomstudio.ai">Email Us</a></li><li><a href="#">Palmdale, CA</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 AXIOM Studio. A Silent Crane Company.</span>
+      <span>Privacy · Terms · 30-Day Money-Back Guarantee</span>
+    </div>
+  </div>
+</footer>
+
+<a href="https://paymegpt.com/shop/starlight-gm" target="_blank" class="float-btn" id="floatBtn">Buy Now — From $797 →</a>
+
+
+  <script src="script.js"></script>
+</body>
+</html>
